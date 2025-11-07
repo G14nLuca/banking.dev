@@ -1,5 +1,5 @@
-function Home(){
-    return <h1>Oi pai. Eu só queria dizer que eu te amo e que você é tudo pra mim. Um beijo, Gian.</h1>
+function MainPage(){
+    return <h1>Por enquanto, finja que tem um aplicativo muito legal nessa página.</h1>
 }
 
-export default Home
+export default MainPage
