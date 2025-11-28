@@ -1,58 +1,53 @@
-import {Client} from 'pg';
-import dotenv from 'dotenv';
-dotenv.config();
+const { Client } = require('pg');
+require('dotenv').config();
 
 class PGClient {
-    static INSTANCE;
+  static INSTANCE;
+  #client;
+  #connected;
 
-    constructor(){
-        if (PGClient.INSTANCE){
-            return PGClient.INSTANCE;
-        }
-
-        PGClient.INSTANCE = this;
-
-        this.client = new Client({
-            host: process.env.POSTGRES_HOST,
-            port: process.env.POSTGRES_PORT,
-            user: process.env.POSTGRES_USER,
-            password: process.env.POSTGRES_PASSWORD,
-            database: process.env.POSTGRES_DB
-        });
-
-        this.connected = false;
-
-    }
-    
-    static getClient(){
-        if (!PGClient.INSTANCE){
-            PGClient.INSTANCE = new Client();
-        } 
-
-        return PGClient.INSTANCE;
+  constructor() {
+    if (PGClient.INSTANCE) {
+      return PGClient.INSTANCE;
     }
 
-    static async #openConnection(){
-        if(!this.connected){
-            await this.client.connect();
-            this.connected = true;
-        }
-    }
+    this.#client = new Client({
+      host: process.env.POSTGRES_HOST,
+      port: process.env.POSTGRES_PORT,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+    });
 
-    static async #endConnection(){
-        if(this.connected){
-            await this.client.end();
-            this.connected = false;
-        }
-    }
+    this.#connected = false;
+    PGClient.INSTANCE = this;
+  }
 
-    static async query(queryRequest){
-        await this.#openConnection();
-        const result = await this.client.query(queryRequest);
-        await this.#endConnection();
-        return result;
+  async #openConnection() {
+    if (!this.#connected) {
+      await this.#client.connect();
+      this.#connected = true;
     }
+  }
+
+  async #endConnection() {
+    if (this.#connected) {
+      await this.#client.end();
+      this.#connected = false;
+    }
+  }
+
+  async query(queryRequest) {
+    await this.#openConnection();
+    const result = await this.#client.query(queryRequest);
+    await this.#endConnection();
+    return result;
+  }
+
+  getClient(){
+    return this;
+  }
 }
 
 const database = new PGClient();
-export default database;
+module.exports = database.getClient();
