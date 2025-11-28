@@ -5,5 +5,5 @@ const nextConfig = {
     useDeploymentIdServerActions: true,
   },
 };
- 
+
 module.exports = nextConfig;
